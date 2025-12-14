@@ -101,6 +101,7 @@ const particleMaterial = new THREE.ShaderMaterial({
     uniforms: {
         uTime: { value: 0 },
         uMix: { value: 0 },
+        uExplosion: { value: 0 },
         uColor1: { value: new THREE.Color(config.colors.ink) },
         uColor2: { value: new THREE.Color(config.colors.accent) },
         uPixelRatio: { value: Math.min(window.devicePixelRatio, 2) },
@@ -150,6 +151,10 @@ function updateScrollLogic() {
     // 2. Particle Formation (0.2 -> 0.6)
     const particlePhase = Math.min(Math.max((progress - 0.2) * 2.5, 0), 1.0);
     particleMaterial.uniforms.uMix.value = particlePhase;
+
+    // 2.5 Explosion (0.8 -> 1.0)
+    const explosionPhase = Math.min(Math.max((progress - 0.8) * 5.0, 0), 1.0);
+    particleMaterial.uniforms.uExplosion.value = explosionPhase;
 
     // 3. Camera Movement
     if (progress < 0.5) {

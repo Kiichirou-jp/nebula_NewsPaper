@@ -96,6 +96,7 @@ void main() {
 export const particleVertexShader = `
 uniform float uTime;
 uniform float uMix;
+uniform float uExplosion;
 uniform float uPixelRatio;
 
 attribute vec3 initialPos;
@@ -150,6 +151,11 @@ void main() {
     vAlpha = 1.0;
     // Fade in particles as paper fades out
     if(uMix < 0.1) vAlpha = uMix * 10.0;
+
+    // Fade out at very end of explosion to avoid clipping or just looking messy
+    if(uExplosion > 0.8) {
+         vAlpha = 1.0 - (uExplosion - 0.8) * 5.0;
+    }
 }
 `;
 
