@@ -115,16 +115,25 @@ const particleSystem = new THREE.Points(particlesGeo, particleMaterial);
 scene.add(particleSystem);
 
 
-// --- 3. ANIMATION \u0026 SCROLL ---
+// --- 3. ANIMATION & SCROLL ---
 
 // Sync Scroll with WebGL uniforms
 // We map the scroll progress (0 to 1) to our animation phases
 // Total height is roughly 400vh (4 sections)
 
+// Inertial Scroll Values
+let currentScroll = 0;
+let targetScroll = 0;
+
 function updateScrollLogic() {
     const totalHeight = document.body.scrollHeight - window.innerHeight;
-    const scrollY = window.scrollY;
-    const progress = Math.min(scrollY / totalHeight, 1);
+    targetScroll = window.scrollY;
+
+    // Linear interpolation for smooth feel (Inertia)
+    // 0.05 is the "smoothness" factor. Lower is smoother/slower.
+    currentScroll += (targetScroll - currentScroll) * 0.05;
+
+    const progress = Math.min(Math.max(currentScroll / totalHeight, 0), 1);
 
     // Normalized scroll for GL logic (0.0 - 1.0)
     // We want the transformation to happen primarily in the first section/transition
@@ -133,14 +142,13 @@ function updateScrollLogic() {
     const paperPhase = Math.min(progress * 3.3, 1.0);
     paperMaterial.uniforms.uProgress.value = paperPhase;
 
-    paperMesh.rotation.y = scrollY * 0.0005;
-    paperMesh.rotation.z = -0.1 + scrollY * 0.0002;
+    paperMesh.rotation.y = currentScroll * 0.0005;
+    paperMesh.rotation.z = -0.1 + currentScroll * 0.0002;
 
     // 2. Particle Formation (0.2 -> 0.6)
     const particlePhase = Math.min(Math.max((progress - 0.2) * 2.5, 0), 1.0);
     particleMaterial.uniforms.uMix.value = particlePhase;
 
-    // 3. Camera Movement
     // 3. Camera Movement
     if (progress < 0.5) {
         // Start at 22, drift out to 25
