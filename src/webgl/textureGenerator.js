@@ -8,13 +8,13 @@ export function createNewspaperTexture() {
     canvas.height = size;
     const ctx = canvas.getContext("2d");
 
-    // Background (Old Paper)
-    ctx.fillStyle = "#f4f1ea";
+    // Background (Old Paper -> Japanese Newspaper Gray)
+    ctx.fillStyle = "#e3e3e3";
     ctx.fillRect(0, 0, size, size);
 
     // Add Noise/Grain to texture
     for (let i = 0; i < 50000; i++) {
-        ctx.fillStyle = Math.random() > 0.5 ? "#e0dac8" : "#ffffff";
+        ctx.fillStyle = Math.random() > 0.5 ? "#d3d3d3" : "#eeeeee";
         ctx.fillRect(
             Math.random() * size,
             Math.random() * size,
@@ -48,7 +48,7 @@ export function createNewspaperTexture() {
     ctx.beginPath();
     ctx.arc(0, 0, 90, 0, Math.PI * 2);
     ctx.fill();
-    ctx.fillStyle = "#f4f1ea";
+    ctx.fillStyle = "#e3e3e3";
     ctx.font = "bold 60px serif";
     ctx.fillText("号外", 0, 20);
     ctx.restore();
