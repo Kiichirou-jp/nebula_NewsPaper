@@ -44,7 +44,7 @@ export function createNewspaperTexture() {
     ctx.save();
     ctx.translate(size - 180, 120);
     ctx.rotate(-0.2);
-    ctx.fillStyle = "#D93025"; // Crimson
+    ctx.fillStyle = "#9d00ff"; // Purple
     ctx.beginPath();
     ctx.arc(0, 0, 90, 0, Math.PI * 2);
     ctx.fill();

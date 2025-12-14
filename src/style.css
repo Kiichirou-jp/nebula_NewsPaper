@@ -8,7 +8,8 @@
 }
 
 body {
-    background-color: #050505; /* 深い墨色 */
+    background-color: #050505;
+    /* 深い墨色 */
     color: #f0f0f0;
     font-family: "Shippori Mincho", serif;
     overflow-x: hidden;
@@ -24,7 +25,8 @@ body {
     width: 100%;
     height: 100vh;
     z-index: 1;
-    pointer-events: none; /* スクロールを通す */
+    pointer-events: none;
+    /* スクロールを通す */
 }
 
 /* --- Scroll Layout (Virtual Scroll Height) --- */
@@ -41,7 +43,8 @@ body {
     opacity: 0;
     animation: fadeIn 2s 1s forwards;
     color: #fff;
-    border-right: 1px solid #d93025; /* 朱色のライン */
+    border-right: 1px solid #9d00ff;
+    /* Purple line */
     padding-right: 1rem;
     z-index: 20;
 }
@@ -66,7 +69,8 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: #f4f1ea; /* 古紙の色 */
+    background: #f4f1ea;
+    /* 古紙の色 */
     z-index: 999;
     display: flex;
     justify-content: center;
@@ -92,13 +96,14 @@ body {
     position: relative;
     overflow: hidden;
 }
+
 .progress-fill {
     position: absolute;
     left: 0;
     top: 0;
     height: 100%;
     width: 0%;
-    background: #d93025;
+    background: #9d00ff;
     transition: width 0.3s;
 }
 
@@ -113,14 +118,17 @@ body {
         transform: scaleY(0);
         transform-origin: top;
     }
+
     50% {
         transform: scaleY(1);
         transform-origin: top;
     }
+
     51% {
         transform: scaleY(1);
         transform-origin: bottom;
     }
+
     100% {
         transform: scaleY(0);
         transform-origin: bottom;
@@ -132,7 +140,8 @@ body {
     position: relative;
     z-index: 10;
     width: 100%;
-    pointer-events: none; /* Let clicks pass through to canvas if needed, or specific elements */
+    pointer-events: none;
+    /* Let clicks pass through to canvas if needed, or specific elements */
 }
 
 .section {
@@ -140,21 +149,24 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: flex-end; /* Text on the right */
+    align-items: flex-end;
+    /* Text on the right */
     padding: 10vw;
     position: relative;
 }
 
 #section-hero {
-    height: 150vh; /* Extra spacing for opening */
+    height: 150vh;
+    /* Extra spacing for opening */
 }
 
 .section h2 {
     font-size: 3rem;
     margin-bottom: 2rem;
-    opacity: 0; /* Animated by JS */
+    opacity: 0;
+    /* Animated by JS */
     transform: translateY(20px);
-    text-shadow: 0 0 10px rgba(0,0,0,0.5);
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
 .article-body {
@@ -164,7 +176,8 @@ body {
     background: rgba(0, 0, 0, 0.4);
     backdrop-filter: blur(4px);
     padding: 2rem;
-    border-left: 1px solid #d93025;
-    opacity: 0; /* Animated by JS */
+    border-left: 1px solid #9d00ff;
+    opacity: 0;
+    /* Animated by JS */
     transform: translateY(20px);
 }

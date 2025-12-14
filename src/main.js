@@ -107,6 +107,7 @@ const particleMaterial = new THREE.ShaderMaterial({
     },
     transparent: true,
     depthWrite: false,
+    blending: THREE.AdditiveBlending, // Glow effect
     vertexShader: particleVertexShader,
     fragmentShader: particleFragmentShader,
 });
