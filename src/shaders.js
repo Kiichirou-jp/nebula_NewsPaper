@@ -23,20 +23,24 @@ float noise (in vec2 st) {
 
 void main() {
     vUv = uv;
-
     vec3 pos = position;
 
-    // Wave effect based on time
-    float wave = sin(pos.x * 2.0 + uTime) * 0.1 * (1.0 - uProgress);
-    pos.z += wave;
+    // Digital Wave / Glitch effect
+    float distortion = sin(pos.y * 10.0 + uTime * 5.0) * 0.05 * uProgress;
+    pos.x += distortion;
 
-    // Explosion/Disintegration effect based on uProgress
-    float n = noise(pos.xy * 3.0 + uTime * 0.1);
+    // Disintegration effect
+    // Use blocky noise for digital feel?
+    // For now, keep continuous noise but change displacement vector
+    float n = noise(pos.xy * 5.0 + uTime * 0.2); 
     vNoise = n;
 
-    // 紙が破けて散る動き
-    vec3 explosionDir = normal * n * 5.0;
-    pos += explosionDir * uProgress * uProgress * 2.0;
+    // Instead of exploding outward, "upload" upwards and separate
+    vec3 lift = vec3(0.0, 1.0, 0.5); // Up and back
+    pos += lift * uProgress * n * 5.0; // Lift pieces up
+
+    // Glitch/jitter
+    pos.x += (random(uv + uTime) - 0.5) * 0.1 * uProgress;
 
     gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
 }
@@ -52,16 +56,29 @@ uniform float uTime;
 void main() {
     vec4 texColor = texture2D(uTexture, vUv);
 
-    // Discard logic for "burning" or "tearing" away
-    // インクが滲むような閾値処理
-    float threshold = uProgress * 1.5;
+    // Digital Dissolve Threshold
+    float threshold = uProgress * 1.8; // Speed up slightly
     float edge = 0.05;
 
+    // "Data" grid effect overlay on dissolve
+    float grid = step(0.9, fract(vUv.x * 50.0)) + step(0.9, fract(vUv.y * 50.0));
+    
     if(vNoise < threshold - edge) discard;
 
-    // Edge glow (burning edge)
+    // Edge glow (Digital Energy)
     if(vNoise < threshold) {
-            texColor.rgb = vec3(0.85, 0.19, 0.14); // Red/Orange burn
+        // Cyan / White energy
+        float intensity = (threshold - vNoise) / edge;
+        // texColor.rgb = mix(vec3(0.0, 1.0, 1.0), vec3(1.0), intensity); 
+        texColor.rgb = vec3(0.2, 0.8, 1.0) * 2.0; // Bright Cyan
+        texColor.a = 1.0;
+    }
+
+    // Slight tech overlay during transition
+    if(uProgress > 0.0) {
+        if(grid > 0.5 && vNoise < threshold + 0.2) {
+             texColor.rgb += vec3(0.0, 0.5, 1.0) * 0.5;
+        }
     }
 
     // Old paper yellowing removed for gray texture
