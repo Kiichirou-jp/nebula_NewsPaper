@@ -141,8 +141,10 @@ function updateScrollLogic() {
     particleMaterial.uniforms.uMix.value = particlePhase;
 
     // 3. Camera Movement
+    // 3. Camera Movement
     if (progress < 0.5) {
-        camera.position.z = 15 + progress * 10;
+        // Start at 22, drift out to 25
+        camera.position.z = 22 + progress * 6;
     } else {
         const zoomIn = (progress - 0.5) * 2.0;
         camera.position.z = 25 - zoomIn * 15;
