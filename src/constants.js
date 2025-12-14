@@ -6,5 +6,5 @@ export const config = {
         accent: 0x9d00ff, // Bright Purple
     },
     particleCount: 25000,
-    text: "日本完全復活",
+    text: "シルク岩塩",
 };
