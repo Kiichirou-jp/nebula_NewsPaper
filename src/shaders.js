@@ -138,6 +138,31 @@ void main() {
         pos.z = nz;
     }
 
+    // Explosion Effect
+    if(uExplosion > 0.0) {
+        float explosionProgress = easeInOutCubic(uExplosion);
+        
+        // Direction: Away from center + Towards Camera
+        vec3 center = vec3(0.0, 0.0, 0.0);
+        vec3 direction = normalize(pos - center);
+        
+        // Add randomness to direction for chaotic burst
+        direction.x += (aRandom - 0.5);
+        direction.y += (aRandom - 0.5);
+        
+        // Strong forward movement
+        vec3 explodeVec = direction * 5.0; // Radial spread
+        explodeVec.z += 20.0; // Strong forward motion towards camera
+        
+        // Apply explosion
+        // Spread more based on randomness (some particles faster)
+        float speed = 1.0 + aRandom * 2.0;
+        pos += explodeVec * explosionProgress * speed;
+        
+        // Add rotation/tumble during explosion
+        pos.x += sin(uTime * 10.0 + aRandom * 10.0) * explosionProgress * 2.0;
+    }
+
     vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
     gl_Position = projectionMatrix * mvPosition;
 
