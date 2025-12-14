@@ -64,9 +64,9 @@ void main() {
             texColor.rgb = vec3(0.85, 0.19, 0.14); // Red/Orange burn
     }
 
-    // Old paper yellowing
-    vec3 sepia = vec3(1.2, 1.0, 0.8);
-    texColor.rgb *= sepia;
+    // Old paper yellowing removed for gray texture
+    // vec3 sepia = vec3(1.2, 1.0, 0.8);
+    // texColor.rgb *= sepia;
 
     gl_FragColor = texColor;
 }
