@@ -1,0 +1,792 @@
+<!doctype html>
+<html lang="ja">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>号外：日本完全復活 | NEBULA VISION</title>
+        <meta
+            name="description"
+            content="昭和の熱気と未来のテクノロジーが融合する、イマーシブな号外体験。"
+        />
+
+        <!-- Google Fonts: 昭和レトロとモダンを感じさせる明朝体 -->
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;800&display=swap"
+            rel="stylesheet"
+        />
+
+        <style>
+            /* --- Base & Reset --- */
+            *,
+            *::before,
+            *::after {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+
+            body {
+                background-color: #050505; /* 深い墨色 */
+                color: #f0f0f0;
+                font-family: "Shippori Mincho", serif;
+                overflow-x: hidden;
+                width: 100vw;
+                overscroll-behavior: none;
+            }
+
+            /* --- Canvas Layer --- */
+            #canvas-container {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100vh;
+                z-index: 1;
+                pointer-events: none; /* スクロールを通す */
+            }
+
+            /* --- Scroll Layout (Virtual Scroll Height) --- */
+            .scroll-content {
+                height: 600vh; /* 長めのスクロールでストーリーを語る */
+                position: relative;
+                z-index: 10;
+            }
+
+            /* --- UI Overlay --- */
+            .overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                pointer-events: none;
+                z-index: 20;
+                mix-blend-mode: exclusion;
+            }
+
+            .header {
+                position: absolute;
+                top: 2rem;
+                left: 2rem;
+                writing-mode: vertical-rl;
+                font-size: 1.2rem;
+                letter-spacing: 0.2em;
+                opacity: 0;
+                animation: fadeIn 2s 1s forwards;
+                color: #fff;
+                border-right: 1px solid #d93025; /* 朱色のライン */
+                padding-right: 1rem;
+            }
+
+            .footer {
+                position: absolute;
+                bottom: 2rem;
+                right: 2rem;
+                text-align: right;
+                font-size: 0.9rem;
+                opacity: 0;
+                animation: fadeIn 2s 2s forwards;
+            }
+
+            .scroll-prompt {
+                position: absolute;
+                bottom: 3rem;
+                left: 50%;
+                transform: translateX(-50%);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                opacity: 0;
+                animation: fadeIn 2s 3s forwards;
+            }
+
+            .scroll-line {
+                width: 1px;
+                height: 60px;
+                background: linear-gradient(to bottom, #d93025, transparent);
+                margin-top: 10px;
+                animation: scrollDown 1.5s infinite;
+            }
+
+            /* --- Grain Effect (Noise) --- */
+            .grain {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                pointer-events: none;
+                z-index: 5;
+                opacity: 0.07;
+                background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E");
+            }
+
+            /* --- Loading Screen --- */
+            #loader {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: #f4f1ea; /* 古紙の色 */
+                z-index: 999;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                flex-direction: column;
+                color: #111;
+                transition: opacity 1s ease-out;
+            }
+
+            .loader-text {
+                font-size: 2rem;
+                font-weight: 800;
+                letter-spacing: 0.5em;
+                margin-bottom: 1rem;
+                position: relative;
+            }
+
+            /* Loading Bar */
+            .progress-bar {
+                width: 200px;
+                height: 2px;
+                background: #ccc;
+                position: relative;
+                overflow: hidden;
+            }
+            .progress-fill {
+                position: absolute;
+                left: 0;
+                top: 0;
+                height: 100%;
+                width: 0%;
+                background: #d93025;
+                transition: width 0.3s;
+            }
+
+            @keyframes fadeIn {
+                to {
+                    opacity: 1;
+                }
+            }
+
+            @keyframes scrollDown {
+                0% {
+                    transform: scaleY(0);
+                    transform-origin: top;
+                }
+                50% {
+                    transform: scaleY(1);
+                    transform-origin: top;
+                }
+                51% {
+                    transform: scaleY(1);
+                    transform-origin: bottom;
+                }
+                100% {
+                    transform: scaleY(0);
+                    transform-origin: bottom;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <!-- Loading Screen -->
+        <div id="loader">
+            <div class="loader-text">印刷中...</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+        </div>
+
+        <!-- UI Overlay -->
+        <div class="grain"></div>
+        <div class="overlay">
+            <div class="header">
+                昭和壱〇〇年<br />
+                特別号外
+            </div>
+            <div class="scroll-prompt">
+                <span>SCROLL TO READ</span>
+                <div class="scroll-line"></div>
+            </div>
+            <div class="footer">
+                NEBULA VISION<br />
+                INTERACTIVE ARCHIVE
+            </div>
+        </div>
+
+        <!-- WebGL Container -->
+        <div id="canvas-container"></div>
+
+        <!-- Scroll Trigger Content -->
+        <div class="scroll-content"></div>
+
+        <!-- Three.js & Libraries -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+        <!-- GSAP for smooth animations -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+        <script>
+            // --- 1. SETUP & CONFIG ---
+            const config = {
+                colors: {
+                    bg: 0x050505,
+                    paper: 0xf4f1ea,
+                    ink: 0x111111,
+                    accent: 0xd93025, // 朱色
+                },
+                particleCount: 25000,
+                text: "日本完全復活",
+            };
+
+            const canvasContainer = document.getElementById("canvas-container");
+            const scene = new THREE.Scene();
+            scene.fog = new THREE.FogExp2(config.colors.bg, 0.02);
+
+            const camera = new THREE.PerspectiveCamera(
+                45,
+                window.innerWidth / window.innerHeight,
+                0.1,
+                100,
+            );
+            camera.position.set(0, 0, 15);
+
+            const renderer = new THREE.WebGLRenderer({
+                antialias: true,
+                alpha: true,
+            });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            canvasContainer.appendChild(renderer.domElement);
+
+            // --- 2. ASSET GENERATION (Newspaper Texture) ---
+            // 外部画像を使わず、Canvasで号外テクスチャを動的に生成します
+            function createNewspaperTexture() {
+                const size = 1024;
+                const canvas = document.createElement("canvas");
+                canvas.width = size;
+                canvas.height = size;
+                const ctx = canvas.getContext("2d");
+
+                // Background (Old Paper)
+                ctx.fillStyle = "#f4f1ea";
+                ctx.fillRect(0, 0, size, size);
+
+                // Add Noise/Grain to texture
+                for (let i = 0; i < 50000; i++) {
+                    ctx.fillStyle = Math.random() > 0.5 ? "#e0dac8" : "#ffffff";
+                    ctx.fillRect(
+                        Math.random() * size,
+                        Math.random() * size,
+                        2,
+                        2,
+                    );
+                }
+
+                // --- Layout: Classic Japanese Newspaper ---
+
+                // Header Bar
+                ctx.fillStyle = "#111";
+                ctx.fillRect(50, 50, size - 100, 10);
+                ctx.fillRect(50, 180, size - 100, 5);
+
+                // Title (Large Kanji)
+                ctx.font =
+                    '900 130px "Shippori Mincho", "Times New Roman", serif';
+                ctx.fillStyle = "#111";
+                ctx.textAlign = "center";
+                ctx.fillText("日本完全復活", size / 2, 150);
+
+                // Subtitles & Columns
+                ctx.font = 'bold 40px "Shippori Mincho", serif';
+                ctx.fillText("経済・文化・技術の三位一体", size / 2, 240);
+
+                // "Gogai" Red Stamp (Impact)
+                ctx.save();
+                ctx.translate(size - 180, 120);
+                ctx.rotate(-0.2);
+                ctx.fillStyle = "#D93025"; // Crimson
+                ctx.beginPath();
+                ctx.arc(0, 0, 90, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = "#f4f1ea";
+                ctx.font = "bold 60px serif";
+                ctx.fillText("号外", 0, 20);
+                ctx.restore();
+
+                // Fake Text Columns (Vertical Lines)
+                ctx.fillStyle = "#222";
+                const colWidth = 40;
+                const startY = 300;
+                const endY = size - 50;
+
+                for (let x = size - 80; x > 80; x -= 60) {
+                    // Draw vertical lines representing text
+                    let y = startY;
+                    while (y < endY) {
+                        const charHeight = Math.random() * 30 + 10;
+                        if (Math.random() > 0.1) {
+                            ctx.fillRect(x, y, 6, charHeight);
+                        }
+                        y += charHeight + 8;
+                    }
+                    // Divider lines
+                    if ((size - 80 - x) % 240 === 0) {
+                        ctx.fillStyle = "#ccc";
+                        ctx.fillRect(x - 30, startY, 1, endY - startY);
+                        ctx.fillStyle = "#222";
+                    }
+                }
+
+                // Image Placeholder (Abstract photo)
+                ctx.fillStyle = "#333";
+                ctx.globalAlpha = 0.8;
+                ctx.fillRect(100, 450, 400, 300);
+                ctx.globalAlpha = 1.0;
+
+                // Caption
+                ctx.font = "20px serif";
+                ctx.fillText("歓喜に沸く人々 (資料映像)", 300, 780);
+
+                const texture = new THREE.CanvasTexture(canvas);
+                return texture;
+            }
+
+            const paperTexture = createNewspaperTexture();
+
+            // --- 3. OBJECTS & PARTICLES ---
+
+            // A. The Newspaper (Mesh)
+            // ShaderMaterialを使うことで、ボロボロと崩れる表現を可能にする
+            const paperGeometry = new THREE.PlaneGeometry(14, 14, 128, 128);
+
+            const paperUniforms = {
+                uTime: { value: 0 },
+                uTexture: { value: paperTexture },
+                uProgress: { value: 0 }, // Controls disintegration
+                uNoiseScale: { value: 3.0 },
+            };
+
+            const paperMaterial = new THREE.ShaderMaterial({
+                uniforms: paperUniforms,
+                transparent: true,
+                side: THREE.DoubleSide,
+                vertexShader: `
+                varying vec2 vUv;
+                varying float vNoise;
+                uniform float uTime;
+                uniform float uProgress;
+
+                // Simple Pseudo Random
+                float random (vec2 st) {
+                    return fract(sin(dot(st.xy, vec2(12.9898,78.233)))*43758.5453123);
+                }
+
+                // Noise function
+                float noise (in vec2 st) {
+                    vec2 i = floor(st);
+                    vec2 f = fract(st);
+                    float a = random(i);
+                    float b = random(i + vec2(1.0, 0.0));
+                    float c = random(i + vec2(0.0, 1.0));
+                    float d = random(i + vec2(1.0, 1.0));
+                    vec2 u = f * f * (3.0 - 2.0 * f);
+                    return mix(a, b, u.x) + (c - a)* u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
+                }
+
+                void main() {
+                    vUv = uv;
+
+                    vec3 pos = position;
+
+                    // Wave effect based on time
+                    float wave = sin(pos.x * 2.0 + uTime) * 0.1 * (1.0 - uProgress);
+                    pos.z += wave;
+
+                    // Explosion/Disintegration effect based on uProgress
+                    float n = noise(pos.xy * 3.0 + uTime * 0.1);
+                    vNoise = n;
+
+                    // 紙が破けて散る動き
+                    vec3 explosionDir = normal * n * 5.0;
+                    pos += explosionDir * uProgress * uProgress * 2.0;
+
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+                }
+            `,
+                fragmentShader: `
+                varying vec2 vUv;
+                varying float vNoise;
+                uniform sampler2D uTexture;
+                uniform float uProgress;
+                uniform float uTime;
+
+                void main() {
+                    vec4 texColor = texture2D(uTexture, vUv);
+
+                    // Discard logic for "burning" or "tearing" away
+                    // インクが滲むような閾値処理
+                    float threshold = uProgress * 1.5;
+                    float edge = 0.05;
+
+                    if(vNoise < threshold - edge) discard;
+
+                    // Edge glow (burning edge)
+                    if(vNoise < threshold) {
+                         texColor.rgb = vec3(0.85, 0.19, 0.14); // Red/Orange burn
+                    }
+
+                    // Old paper yellowing
+                    vec3 sepia = vec3(1.2, 1.0, 0.8);
+                    texColor.rgb *= sepia;
+
+                    gl_FragColor = texColor;
+                }
+            `,
+            });
+
+            const paperMesh = new THREE.Mesh(paperGeometry, paperMaterial);
+            scene.add(paperMesh);
+
+            // B. The Mechanical Eye (Particle System)
+            // 紙から散ったパーティクルが、この「眼」の形に集まる
+
+            // Geometry for the Eye shape
+            const eyeGeometry = new THREE.TorusKnotGeometry(3, 0.8, 150, 20);
+            // Add a central sphere for the pupil
+            const pupilGeometry = new THREE.SphereGeometry(1.5, 32, 32);
+
+            // Combine geometries requires simpler approach for particles:
+            // Sampling points from the surfaces
+
+            function sampleGeometry(geo, count) {
+                const tempMesh = new THREE.Mesh(
+                    geo,
+                    new THREE.MeshBasicMaterial(),
+                );
+                const sampler = new THREE.Vector3();
+                const positions = new Float32Array(count * 3);
+
+                // Very basic rejection sampling or vertex grabbing
+                // For robustness without external heavy library (MeshSurfaceSampler),
+                // we'll just grab vertices randomly and interpolate if needed,
+                // or generate mathematical shapes.
+
+                return positions;
+            }
+
+            // Custom Particle System
+            const particleCount = config.particleCount;
+            const particlesGeo = new THREE.BufferGeometry();
+
+            const posArray = new Float32Array(particleCount * 3); // Current
+            const initialPosArray = new Float32Array(particleCount * 3); // Paper State
+            const targetPosArray = new Float32Array(particleCount * 3); // Eye State
+            const randomArray = new Float32Array(particleCount); // For offset animation
+
+            // 1. Initial State: Scattered grid matching the paper plane
+            for (let i = 0; i < particleCount; i++) {
+                const x = (Math.random() - 0.5) * 14;
+                const y = (Math.random() - 0.5) * 14;
+                const z = (Math.random() - 0.5) * 0.5; // Slightly volume on paper
+
+                initialPosArray[i * 3] = x;
+                initialPosArray[i * 3 + 1] = y;
+                initialPosArray[i * 3 + 2] = z;
+
+                // Initialize current pos
+                posArray[i * 3] = x;
+                posArray[i * 3 + 1] = y;
+                posArray[i * 3 + 2] = z;
+
+                randomArray[i] = Math.random();
+            }
+
+            // 2. Target State: Mathematical Mechanical Eye (Torus + Sphere)
+            for (let i = 0; i < particleCount; i++) {
+                let x, y, z;
+
+                // 70% make the Torus Knot (The Iris/Frame)
+                // 30% make the Sphere (The Pupil)
+
+                if (i < particleCount * 0.7) {
+                    // Torus Knot math
+                    // p=2, q=3
+                    const u = Math.random() * Math.PI * 2 * 10; // multiple loops
+                    const tube = 0.6 + Math.random() * 0.4; // variable thickness
+                    const r = 2.5 + Math.cos(3 * u) * 0.5;
+
+                    // Approximate knot distribution
+                    const p = 2;
+                    const q = 3;
+                    const phi = Math.random() * Math.PI * 2;
+
+                    // Simplification for particle cloud shape resembling eye
+                    const angle = Math.random() * Math.PI * 2;
+                    const radius = 2.5 + Math.random() * 1.5;
+                    const depth = (Math.random() - 0.5) * 1.5;
+
+                    // Ring
+                    x = Math.cos(angle) * radius;
+                    y = Math.sin(angle) * radius;
+                    z = depth;
+                } else {
+                    // Sphere (Pupil)
+                    const phi = Math.acos(-1 + 2 * Math.random());
+                    const theta = Math.sqrt(particleCount * Math.PI) * phi;
+                    const r = 1.2;
+
+                    x = r * Math.cos(theta) * Math.sin(phi);
+                    y = r * Math.sin(theta) * Math.sin(phi);
+                    z = r * Math.cos(phi);
+
+                    // Pupil sits forward slightly
+                    z += 0.5;
+                }
+
+                targetPosArray[i * 3] = x;
+                targetPosArray[i * 3 + 1] = y;
+                targetPosArray[i * 3 + 2] = z;
+            }
+
+            particlesGeo.setAttribute(
+                "position",
+                new THREE.BufferAttribute(posArray, 3),
+            );
+            particlesGeo.setAttribute(
+                "initialPos",
+                new THREE.BufferAttribute(initialPosArray, 3),
+            );
+            particlesGeo.setAttribute(
+                "targetPos",
+                new THREE.BufferAttribute(targetPosArray, 3),
+            );
+            particlesGeo.setAttribute(
+                "aRandom",
+                new THREE.BufferAttribute(randomArray, 1),
+            );
+
+            const particleMaterial = new THREE.ShaderMaterial({
+                uniforms: {
+                    uTime: { value: 0 },
+                    uMix: { value: 0 }, // 0 = Paper, 1 = Eye
+                    uColor1: { value: new THREE.Color(config.colors.ink) }, // 墨
+                    uColor2: { value: new THREE.Color(config.colors.accent) }, // 朱
+                    uPixelRatio: {
+                        value: Math.min(window.devicePixelRatio, 2),
+                    },
+                },
+                transparent: true,
+                depthWrite: false,
+                vertexShader: `
+                uniform float uTime;
+                uniform float uMix;
+                uniform float uPixelRatio;
+
+                attribute vec3 initialPos;
+                attribute vec3 targetPos;
+                attribute float aRandom;
+
+                varying float vAlpha;
+                varying vec3 vColor;
+                uniform vec3 uColor1;
+                uniform vec3 uColor2;
+
+                // Cubic Bezier Ease
+                float easeInOutCubic(float x) {
+                    return x < 0.5 ? 4.0 * x * x * x : 1.0 - pow(-2.0 * x + 2.0, 3.0) / 2.0;
+                }
+
+                void main() {
+                    // Stagger animation based on random attribute
+                    float progress = smoothstep(0.0, 1.0, (uMix * 1.5) - (aRandom * 0.5));
+                    progress = clamp(progress, 0.0, 1.0);
+                    progress = easeInOutCubic(progress);
+
+                    // Morph positions
+                    vec3 pos = mix(initialPos, targetPos, progress);
+
+                    // Add some noise/turbulence during transition
+                    float noise = sin(uTime * 5.0 + aRandom * 10.0) * sin(progress * 3.14);
+                    pos += noise * 0.5;
+
+                    // Rotation for the Eye mode
+                    if(progress > 0.8) {
+                        float angle = uTime * 0.2 * (1.0 + aRandom * 0.5);
+                        float s = sin(angle);
+                        float c = cos(angle);
+                        // Rotate around Y axis
+                        float nx = pos.x * c - pos.z * s;
+                        float nz = pos.x * s + pos.z * c;
+                        pos.x = nx;
+                        pos.z = nz;
+                    }
+
+                    vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
+                    gl_Position = projectionMatrix * mvPosition;
+
+                    // Size attenuation
+                    gl_PointSize = (4.0 + aRandom * 3.0) * uPixelRatio * (15.0 / -mvPosition.z);
+
+                    // Color mix: Text(Black) -> Energy(Red)
+                    vColor = mix(uColor1, uColor2, progress * progress); // Turns redder as it forms eye
+
+                    // Opacity control
+                    vAlpha = 1.0;
+                    // Fade in particles as paper fades out
+                    if(uMix < 0.1) vAlpha = uMix * 10.0;
+                }
+            `,
+                fragmentShader: `
+                varying float vAlpha;
+                varying vec3 vColor;
+
+                void main() {
+                    // Circular particle
+                    float r = distance(gl_PointCoord, vec2(0.5));
+                    if(r > 0.5) discard;
+
+                    // Soft edge
+                    float glow = 1.0 - (r * 2.0);
+                    glow = pow(glow, 1.5);
+
+                    gl_FragColor = vec4(vColor, vAlpha * glow);
+                }
+            `,
+            });
+
+            const particleSystem = new THREE.Points(
+                particlesGeo,
+                particleMaterial,
+            );
+            scene.add(particleSystem);
+
+            // --- 4. LIGHTING & ENVIRONMENT ---
+
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+            scene.add(ambientLight);
+
+            const spotLight = new THREE.SpotLight(0xff0000, 2);
+            spotLight.position.set(5, 5, 10);
+            spotLight.angle = Math.PI / 6;
+            spotLight.penumbra = 1;
+            scene.add(spotLight);
+
+            // --- 5. ANIMATION & SCROLL LOGIC ---
+
+            // Virtual Scroll Values
+            let scrollY = 0;
+            let maxScroll = 0;
+            let targetScroll = 0;
+
+            function updateScroll() {
+                maxScroll = document.body.scrollHeight - window.innerHeight;
+                targetScroll = window.scrollY;
+                // Linear interpolation for smooth feel
+                scrollY += (targetScroll - scrollY) * 0.05;
+
+                const scrollNorm = Math.min(
+                    Math.max(scrollY / maxScroll, 0),
+                    1,
+                );
+
+                // --- Update Uniforms based on scroll ---
+
+                // 1. Paper Disintegration
+                // Starts at 0, fully gone by 0.4
+                const paperPhase = Math.min(scrollNorm * 2.5, 1.0);
+                paperMaterial.uniforms.uProgress.value = paperPhase;
+
+                // Rotate paper slightly
+                paperMesh.rotation.y = scrollY * 0.0005;
+                paperMesh.rotation.z = -0.1 + scrollY * 0.0002;
+
+                // 2. Particle Formation (The Eye)
+                // Starts appearing at 0.1, fully formed at 0.6
+                const particlePhase = Math.min(
+                    Math.max((scrollNorm - 0.1) * 1.5, 0),
+                    1.0,
+                );
+                particleMaterial.uniforms.uMix.value = particlePhase;
+
+                // 3. Camera Movement (Cinematic)
+                // Zoom out slightly then zoom in to the eye
+                // Initial Z: 15
+                if (scrollNorm < 0.5) {
+                    camera.position.z = 15 + scrollNorm * 10;
+                } else {
+                    // Zoom into the eye
+                    const zoomIn = (scrollNorm - 0.5) * 2.0;
+                    camera.position.z = 25 - zoomIn * 15;
+                }
+
+                // Look slightly up/down
+                camera.position.y = (scrollNorm - 0.5) * -5;
+                camera.lookAt(0, 0, 0);
+            }
+
+            // --- 6. RENDER LOOP ---
+
+            const clock = new THREE.Clock();
+
+            function animate() {
+                requestAnimationFrame(animate);
+
+                const time = clock.getElapsedTime();
+
+                // Update Uniforms
+                paperMaterial.uniforms.uTime.value = time;
+                particleMaterial.uniforms.uTime.value = time;
+
+                updateScroll();
+
+                renderer.render(scene, camera);
+            }
+
+            // --- 7. RESIZE & INIT ---
+
+            window.addEventListener("resize", () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                particleMaterial.uniforms.uPixelRatio.value = Math.min(
+                    window.devicePixelRatio,
+                    2,
+                );
+            });
+
+            // Initialize Animation
+            window.onload = () => {
+                // Loader Animation
+                const loader = document.getElementById("loader");
+                const progress = document.getElementById("progress-fill");
+
+                // Fake loading progress
+                let p = 0;
+                const interval = setInterval(() => {
+                    p += Math.random() * 10;
+                    if (p >= 100) {
+                        p = 100;
+                        clearInterval(interval);
+
+                        // Start
+                        setTimeout(() => {
+                            gsap.to(loader, {
+                                opacity: 0,
+                                duration: 1,
+                                onComplete: () =>
+                                    (loader.style.display = "none"),
+                            });
+                            animate();
+                        }, 500);
+                    }
+                    progress.style.width = p + "%";
+                }, 100);
+            };
+        </script>
+    </body>
+</html>
