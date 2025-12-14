@@ -167,6 +167,49 @@ function updateScrollLogic() {
 
     camera.position.y = (progress - 0.5) * -5;
     camera.lookAt(0, 0, 0);
+
+    // 4. Final Reveal (0.95 -> 1.0)
+    // Trigger fade to white
+    const revealContainer = document.getElementById('final-reveal');
+    const overlay = revealContainer.querySelector('.reveal-overlay');
+    const image = revealContainer.querySelector('.reveal-image');
+
+    if (progress > 0.95) {
+        // Fade in white
+        // progress 0.95 -> 1.0 (range 0.05)
+        const t = Math.min((progress - 0.95) * 20.0, 1.0); // 0.0 -> 1.0
+        overlay.style.opacity = t;
+
+        // Dynamic Shadow Interpolation
+        // From: 0 0 50px rgba(255, 255, 255, 0.8) (White Glow)
+        // To:   0 10px 40px rgba(0, 0, 0, 0.3)    (Dark Shadow)
+
+        const glowColor = [255, 255, 255, 0.8];
+        const shadowColor = [0, 0, 0, 0.3];
+
+        // Lerp alpha
+        const currentAlpha = glowColor[3] * (1.0 - t) + shadowColor[3] * t;
+        const r = glowColor[0] * (1.0 - t) + shadowColor[0] * t;
+        const g = glowColor[1] * (1.0 - t) + shadowColor[1] * t;
+        const b = glowColor[2] * (1.0 - t) + shadowColor[2] * t;
+
+        // Lerp Position/Blur
+        // 0 0 50px -> 0 10px 40px
+        const yOff = 0 * (1.0 - t) + 10 * t;
+        const blur = 50 * (1.0 - t) + 40 * t;
+
+        image.style.boxShadow = `0 ${yOff}px ${blur}px rgba(${r}, ${g}, ${b}, ${currentAlpha})`;
+
+    } else {
+        overlay.style.opacity = 0;
+        // Reset to default glow if needed, though opacity is 0 anyway
+    }
+
+    if (progress > 0.98) {
+        image.style.opacity = (progress - 0.98) * 50.0; // Instant
+    } else {
+        image.style.opacity = 0;
+    }
 }
 
 // Render Loop

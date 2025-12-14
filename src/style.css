@@ -181,3 +181,66 @@ body {
     /* Animated by JS */
     transform: translateY(20px);
 }
+
+/* Final Reveal */
+#final-reveal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 5;
+    /* Lower than .content (10) but higher than .grain/canvas */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.reveal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #fff;
+    opacity: 0;
+    transition: opacity 0.5s linear;
+}
+
+.reveal-image {
+    position: relative;
+    z-index: 2;
+    width: 50vh;
+    /* Fixed size for circle */
+    height: 50vh;
+    border-radius: 50%;
+    /* Circle crop */
+    object-fit: cover;
+    /* Fill the circle */
+    box-shadow: 0 0 50px rgba(255, 255, 255, 0.8);
+    /* Soft glow */
+    opacity: 0;
+    transition: opacity 1s ease-out;
+}
+/* Premium Card (Gold/Black) */
+.premium-card {
+    background: linear-gradient(135deg, #111, #222);
+    border: 1px solid #D4AF37; /* Gold */
+    color: #f0f0f0;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    z-index: 20; /* Ensure on top of white fade (z=5) */
+    position: relative;
+}
+
+.premium-card p {
+    color: #e0e0e0;
+}
+
+/* Gold Heading adjustment if needed specifically for this section */
+#section-hero ~ .section:last-of-type h2 {
+    color: #D4AF37;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+    position: relative;
+    z-index: 20;
+}
