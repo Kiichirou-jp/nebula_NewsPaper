@@ -102,6 +102,7 @@ const particleMaterial = new THREE.ShaderMaterial({
         uTime: { value: 0 },
         uMix: { value: 0 },
         uExplosion: { value: 0 },
+        uConvergence: { value: 0 },
         uColor1: { value: new THREE.Color(config.colors.ink) },
         uColor2: { value: new THREE.Color(config.colors.accent) },
         uPixelRatio: { value: Math.min(window.devicePixelRatio, 2) },
@@ -153,8 +154,15 @@ function updateScrollLogic() {
     particleMaterial.uniforms.uMix.value = particlePhase;
 
     // 2.5 Explosion (0.8 -> 1.0)
+    // We cap explosion at 0.95 slightly so convergence can take over cleanly?
+    // Or let them overlap.
     const explosionPhase = Math.min(Math.max((progress - 0.8) * 5.0, 0), 1.0);
     particleMaterial.uniforms.uExplosion.value = explosionPhase;
+
+    // 2.6 Convergence (0.92 -> 1.0)
+    // Starts just as explosion peaks and screen starts rendering white
+    const convergencePhase = Math.min(Math.max((progress - 0.92) * 12.5, 0), 1.0);
+    particleMaterial.uniforms.uConvergence.value = convergencePhase;
 
     // 3. Camera Movement
     if (progress < 0.5) {

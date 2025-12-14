@@ -97,6 +97,7 @@ export const particleVertexShader = `
 uniform float uTime;
 uniform float uMix;
 uniform float uExplosion;
+uniform float uConvergence;
 uniform float uPixelRatio;
 
 attribute vec3 initialPos;
@@ -161,6 +162,31 @@ void main() {
         
         // Add rotation/tumble during explosion
         pos.x += sin(uTime * 10.0 + aRandom * 10.0) * explosionProgress * 2.0;
+    }
+
+    // Convergence (Implosion) Effect
+    if(uConvergence > 0.0) {
+         float convProgress = easeInOutCubic(uConvergence);
+         
+         // Target: Geometric Center (0,0,0) - where the final image is
+         // Actually final image is DOM overlay, but 3D center matches visually.
+         vec3 center = vec3(0.0, 0.0, 0.0);
+         
+         // Move towards center
+         // We use mix to linearly interpolate, but with a twist
+         // We want them to swirl in? For now, direct attraction.
+         pos = mix(pos, center, convProgress * 0.95); // Don't go fully to 0 to keep some mass
+         
+         // Z adjustment: Pull them slightly back to 0 if they were exploded forward
+         // The explosion pushed Z to +20. Final image is 2D overlay.
+         // We want them to disappear "into" the image.
+         
+         // Color Shift: Blue/Red -> Black
+         vColor = mix(vColor, vec3(0.05, 0.05, 0.05), convProgress);
+         
+         // Shrink slightly?
+         // gl_PointSize will handle distance, but we can force shrink
+         // Handled in PointSize calc if Z changes, or manual multiply
     }
 
     vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
