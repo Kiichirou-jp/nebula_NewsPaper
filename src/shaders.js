@@ -25,9 +25,13 @@ void main() {
     vUv = uv;
     vec3 pos = position;
 
-    // Digital Wave / Glitch effect
+    // Digital Wave / Glitch effect (Scroll based)
     float distortion = sin(pos.y * 10.0 + uTime * 5.0) * 0.05 * uProgress;
     pos.x += distortion;
+
+    // Idle "Breathing" / Wavering animation (Always active)
+    float breath = sin(pos.y * 1.0 + uTime * 1.5) * cos(pos.x * 0.5 + uTime * 1.0) * 0.2;
+    pos.z += breath;
 
     // Disintegration effect
     // Use blocky noise for digital feel?

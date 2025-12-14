@@ -139,8 +139,9 @@ function updateScrollLogic() {
     // Normalized scroll for GL logic (0.0 - 1.0)
     // We want the transformation to happen primarily in the first section/transition
 
-    // 1. Paper Disintegration (0.0 -> 0.3)
-    const paperPhase = Math.min(progress * 3.3, 1.0);
+    // 1. Paper Disintegration (0.1 -> 0.4)
+    // Delay start so it doesn't glow immediately
+    const paperPhase = Math.min(Math.max((progress - 0.1) * 3.3, 0), 1.0);
     paperMaterial.uniforms.uProgress.value = paperPhase;
 
     paperMesh.rotation.y = currentScroll * 0.0005;
